@@ -1,4 +1,6 @@
-import { Home } from "../screens/Home"
-export default function index() {
-    return <Home />
+import { StyleSheet } from "react-native";
+import { Main } from "../components/main";
+export default function Index() {
+
+  return (<Main></Main>);
 }
