@@ -4,7 +4,7 @@ import { ScrollView, Text } from "react-native";
 export default function Registro() {
     return (
         <ScrollView>
-            <Link href={"/"}><Text>Volver</Text></Link>
+            <Link href={"/principal"}><Text>Volver</Text></Link>
             <Text>Aqui esta el registro </Text>
         </ScrollView>
     )

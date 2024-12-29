@@ -1,139 +1,147 @@
-import { StyleSheet, Text, View, Image, StatusBar, ScrollView, ActivityIndicator, FlatList, TextInput, TouchableOpacity } from "react-native";
-import { useState, useEffect } from "react";
-import { getLatestPokemon } from "../lib/metacritic";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { AnimatedCard, Card } from "./card";
+import { StyleSheet, Text, View, Image, useWindowDimensions, TouchableOpacity } from "react-native";
 import { Link } from "expo-router";
-import axios from 'axios'
+import logo from '../assets/logo.jpeg';
+import linkeding from '../assets/icons/linkedin.png';
+
 export function Main() {
-    const [registros, setRegistro] = useState([]);
-    const initialFormState = {
-        userName: "",
-        pass: ""
+    const { width } = useWindowDimensions();
 
-    }
-    const [formState, setFormState] = useState(initialFormState);
-    const API_BASE_URL = "http://192.168.1.35:5001"; // Cambia "192.168.X.X" por la IP de tu computadora
+    const isWeb = width >= 1500; // Determina si es "web"
+    const styles = isWeb ? webStyles : appStyles; // Usa estilos según la plataforma
 
-    function onChangeDato(name, value) {
-        console.log(name, value)
-        setFormState(() => ({ ...formState, [name]: value }));
-    }
-
-
-    useEffect(() => {
-        getLatestPokemon().then((registro) => {
-            setRegistro(registro);
-        });
-
-    }, []);
-    async function registerUser() {
-        if (formState.userName && formState.pass) {
-            try {
-                const response = await axios.post(`${API_BASE_URL}/register`, {
-                    userName: formState.userName,
-                    password: formState.pass,
-                });
-                console.log(response.data);
-                if (response.data == "User already exists") {
-                    alert("Usuario ya registrado");
-                }
-            } catch (error) {
-                console.log("Error al registrar usuario:", error.message);
-            }
-        } else {
-            alert("Complete los datos");
-        }
-    }
-    async function logIn() {
-
-        if (formState.userName && formState.pass) {
-
-            console.log("aqi1")
-            const userData = {
-                userName: formState.userName,
-                password: formState.pass,
-            }
-            const response = await axios.post(`${API_BASE_URL}/login-user`, userData)
-
-            console.log("aqi2")
-            console.log(response.data);
-
-            console.log("aqi3")
-            if (response.data) {
-                alert("User puede ingresar");
-            }
-        }
-
-    }
-    return (<>
+    return (
         <View style={styles.container}>
-            <Link href={"/crearRegistro"}><Text>crear registro</Text></Link >
-            <TextInput
-                style={styles.input}
-                placeholder="username"
-                placeholderTextColor={'black'}
-                onChangeText={(name) => onChangeDato("userName", name)}
-                required
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="contraseña"
-                placeholderTextColor={'black'}
-                onChangeText={(pass) => onChangeDato("pass", pass)}
-                required
-            />
-            <TouchableOpacity style={styles.btnW} onPress={registerUser}>
-                <Text style={styles.btnText}>Registrar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.btnW} onPress={logIn}>
-                <Text style={styles.btnText}>Iniciar sesion</Text>
-            </TouchableOpacity>
+            {/* Logo */}
+            <Image source={logo} style={styles.logo} />
 
-            {
-                registros.length === 0 ?
-                    (<ActivityIndicator
-                        style={{ paddingVertical: "30%", color: "blue", size: "large" }}>
-                    </ActivityIndicator>)
-                    :
-                    (
-                        <FlatList
-                            data={registros}
-                            keyExtractor={(registro) => registro.id}
-                            renderItem={({ item, index }) => <AnimatedCard registro={item} index={index} />}>
+            {/* Texto de bienvenida */}
+            <Text style={styles.welcomeText}>Bienvenido de vuelta</Text>
 
-                        </FlatList>
-                    )
-            }
+            {/* Botón de inicio de sesión */}
+            <View style={styles.btnContainer}>
+                <TouchableOpacity style={styles.btn}>
+                    <Link href={'/logIn'}>
+                        <Text style={styles.btnText}>Iniciar Sesión</Text>
+                    </Link>
+                </TouchableOpacity>
+            </View>
 
-
+            {/* Redes sociales (solo en móvil) */}
+            {!isWeb && (
+                <View style={styles.socialContainer}>
+                    <Text style={styles.socialText}>
+                        ¡Síguenos en nuestras redes sociales{"\n"}para más información!
+                    </Text>
+                    <TouchableOpacity style={styles.socialButton}>
+                        <Link href={'https://www.linkedin.com/company/mawat-solutions/?originalSubdomain=cl'}>
+                            <Image source={linkeding} style={styles.socialIcon} />
+                        </Link>
+                    </TouchableOpacity>
+                </View>
+            )}
         </View>
-    </>
-
     );
 }
 
-const styles = StyleSheet.create({
+const appStyles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: "center",
         padding: 24,
-        backgroundColor: "white",
-
+        backgroundColor: "#072E44",
+        alignItems: "center", // Centrado en móvil
     },
-    input: {
-        backgroundColor: "gray",
-        width: "80%",
+    logo: {
+        marginVertical: "10%",
+        alignSelf: "center",
+        height: 150,
+        width: 500,
+    },
+    welcomeText: {
+        fontSize: 30,
+        color: "white",
+        marginVertical: 20,
+        fontFamily: 'OpenSans-Bold',
+        textAlign: "center",
+    },
+    btnContainer: {
+        justifyContent: "center",
+        alignItems: "center",
+        paddingVertical: "5%",
+        width: "100%",
+        paddingHorizontal: "10%",
+    },
+    btn: {
+        backgroundColor: "#F1F1F1",
+        width: "70%",
+        padding: 10,
         borderRadius: 20,
-        margin: 20,
-        padding: 10
+        alignItems: "center",
+    },
+    btnText: {
+        fontSize: 16,
+        color: "#2E2E2E",
+        fontFamily: 'OpenSans-Regular',
+        textAlign: "center",
+    },
+    socialContainer: {
+        alignItems: "center",
+        marginTop: 30,
+    },
+    socialText: {
+        color: '#E7E7E7',
+        textAlign: "center",
+        fontSize: 16,
+    },
+    socialButton: {
+        marginTop: 30,
+    },
+    socialIcon: {
+        width: 40,
+        height: 40,
+    },
+});
 
-    }
-    , btnW: {
-
+const webStyles = StyleSheet.create({
+    container: {
+        flex: 1,
         padding: 24,
-        margin: 5,
-        backgroundColor: "red"
-    }
-
+        backgroundColor: "#072E44",
+    },
+    logo: {
+        marginVertical: "20%",
+        alignSelf: "flex-start",
+        height: 250,
+        width: 800,
+        marginStart: "5%",
+    },
+    welcomeText: {
+        fontSize: 50,
+        color: "white",
+        fontFamily: 'OpenSans-Bold',
+        position: 'absolute',
+        textAlign: "right",
+        alignSelf: "flex-start",
+        width: "90%",
+        marginVertical: "20%",
+        paddingEnd: 50,
+    },
+    btnContainer: {
+        alignItems: "flex-end",
+        position: "absolute",
+        marginVertical: "30%",
+        width: "90%",
+    },
+    btn: {
+        backgroundColor: "#F1F1F1",
+        width: "30%",
+        padding: 20,
+        borderRadius: 20,
+        alignItems: "center",
+    },
+    btnText: {
+        fontSize: 20,
+        color: "#2E2E2E",
+        fontFamily: 'OpenSans-Regular',
+        textAlign: "center",
+    },
 });

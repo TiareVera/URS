@@ -1,10 +1,11 @@
-import { View, Text } from "react-native";
 import { Slot } from "expo-router";
-export default function Layout() {
+
+import { Layout } from "../components/layout";
+
+export default function AppLayout() {
     return (
-        <View style={{ backgroundColor: "blue", paddingVertical: 100 }}>
-            <Text >Hola 2</Text>
-            <Slot />
-        </View>
-    )
+        <Layout>
+            <Slot /> {/* Aquí se renderizan las rutas dinámicas */}
+        </Layout>
+    );
 }
