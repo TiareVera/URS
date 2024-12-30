@@ -2,7 +2,13 @@ import { Link } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import logo from '../assets/logo_blanco.jpeg';
 import { useRouter } from "expo-router";
-import { View, Text, Image, StyleSheet, Animated, Pressable, useWindowDimensions, TouchableOpacity } from "react-native"
+import {
+    View, Text, Image, StyleSheet,
+    Animated, Pressable, useWindowDimensions,
+    TouchableOpacity, AsyncStorage
+} from "react-native"
+import DownBar from "./downbar";
+import UpBar from "./upbar";
 export function Principal() {
     const { width } = useWindowDimensions();
     const isWeb = width >= 1500; // Determina si es "web"
@@ -13,31 +19,9 @@ export function Principal() {
         router.push(route);
     };
     return (<View style={styles.container}>
-        <View style={styles.header}>
-            <Image source={logo} style={styles.logo} />
-            {isWeb && (
-                <View style={styles.navigation}>
-                    <Link href="/principal" style={styles.navLink}>
-                        Inicio
-                    </Link>
-                    <TouchableOpacity
-                        onPress={() => handleNavigation("/crearRegistro")}
-                        style={styles.navLink}
-                    >
-                        <Text style={styles.navLink}>Agregar Registro</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => handleNavigation("/registro")}
-                        style={styles.navButton}
-                    >
-                        <Text style={styles.navLink}>Ver Registros</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => alert("Cerrar sesión")} style={styles.navButton}>
-                        <Text style={styles.navLink}>Configuración</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
-        </View>
+        {isWeb && (<DownBar></DownBar>)}
+        {!isWeb && (<UpBar></UpBar>)}
+
         <View style={styles.content}>
             <Text style={styles.greeting}>Hola UserName,</Text>
             <Text style={styles.subtitle}>Soluciones sin Límite de Industria</Text>
@@ -69,24 +53,8 @@ export function Principal() {
         </View>
 
         {/* Navegación inferior (solo móvil) */}
-        {!isWeb && (
-            <View style={styles.bottomNavigation}>
-                <Link href="/principal" style={styles.navButton}>
-                    🏠
-                </Link>
-                <Link href="/crearRegistro" style={styles.navButton}>
-                    ➕
-                </Link>
-                <Link href="/registro" style={styles.navButton}>
-                    📋
-                </Link>
-                <TouchableOpacity onPress={() => alert("cerrar sesion")}>
-                    <Text style={styles.navButton}>
-                        ⚙️
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        )}
+
+        {!isWeb && (<DownBar></DownBar>)}
     </View>
     )
 }

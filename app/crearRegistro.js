@@ -3,48 +3,52 @@ import {
     View,
     Text,
     StyleSheet,
-    Image,
-    TextInput,
     TouchableOpacity,
-    ScrollView,
+    Image,
     Platform,
+    TextInput,
+    useWindowDimensions,
+    ScrollView,
 } from "react-native";
-import { Link } from "expo-router";
+import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
-
+import DownBar from "../components/downbar";
+import UpBar from "../components/upbar";
 export default function CrearRegistro() {
-    const [image, setImage] = useState(null); // Almacena la imagen seleccionada
+    const { width } = useWindowDimensions();
+    const isWeb = width >= 1500; // Determina si es "web"
+    const styles = isWeb ? webStyles : appStyles; // Usa estilos según la plataforma
+
+    const [image, setImage] = useState(null); // Imagen seleccionada
     const [title, setTitle] = useState(""); // Título del registro
     const [description, setDescription] = useState(""); // Descripción del registro
-    const [errorMessage, setErrorMessage] = useState("");
+    const [userID] = useState("12345"); // Ejemplo de userID (ajusta según tu autenticación)
 
     const handlePickImage = async () => {
-        if (Platform.OS === "web") {
-            document.getElementById("fileInput").click();
-        } else {
-            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (permissionResult.granted === false) {
-                setErrorMessage("Se requieren permisos para acceder a la galería.");
-                return;
-            }
+        console.log("here")
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permissionResult.granted) {
+            alert("Se requieren permisos para acceder a la galería.");
+            return;
+        }
 
-            const pickerResult = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                aspect: [4, 3],
-                quality: 1,
-            });
+        const pickerResult = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+            base64: true, // Incluir base64
+        });
 
-            if (!pickerResult.canceled) {
-                setImage(pickerResult.assets[0].uri);
-            }
+        if (!pickerResult.canceled) {
+            setImage(`data:image/jpeg;base64,${pickerResult.assets[0].base64}`); // Guardar la imagen en base64
         }
     };
 
     const handleTakePhoto = async () => {
         const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-        if (permissionResult.granted === false) {
-            setErrorMessage("Se requieren permisos para usar la cámara.");
+        if (!permissionResult.granted) {
+            alert("Se requieren permisos para usar la cámara.");
             return;
         }
 
@@ -53,10 +57,11 @@ export default function CrearRegistro() {
             allowsEditing: true,
             aspect: [4, 3],
             quality: 1,
+            base64: true, // Incluir base64
         });
 
         if (!cameraResult.canceled) {
-            setImage(cameraResult.assets[0].uri);
+            setImage(`data:image/jpeg;base64,${cameraResult.assets[0].base64}`); // Guardar la imagen en base64
         }
     };
 
@@ -68,141 +73,178 @@ export default function CrearRegistro() {
             reader.readAsDataURL(file);
         }
     };
-
-    const handleSave = () => {
-        if (!image || !title || !description) {
-            setErrorMessage("Por favor, complete todos los campos.");
+    const handleSave = async () => {
+        if (!title || !description || !image) {
+            alert("Por favor, completa todos los campos.");
             return;
         }
 
-        // Aquí puedes enviar los datos al backend
-        console.log("Registro guardado:", { title, description, image });
-        alert("Registro guardado con éxito.");
+        try {
+            const response = await axios.post("http://192.168.1.35:5001/crear-registro", {
+                titulo: title,
+                descripcion: description,
+                foto: image,
+                userID: userID, // Ajustar según tu lógica de autenticación
+            });
+
+            if (response.data.status === "ok") {
+                alert("Registro creado con éxito");
+                // Resetear el formulario
+                setTitle("");
+                setDescription("");
+                setImage(null);
+            } else {
+                alert("Error al guardar el registro");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error al conectar con el servidor");
+        }
     };
 
+
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Link href={"/principal"}>
-                <Text style={styles.backLink}>Volver</Text>
-            </Link>
-            <Text style={styles.title}>Crear Registro</Text>
+        <View style={{
+            height: "100%",
+            backgroundColor: "#BFC1C0",
+        }} >
 
-            {/* Vista previa de la imagen */}
-            {image && (
-                <Image source={{ uri: image }} style={styles.previewImage} />
-            )}
+            {isWeb && (<DownBar></DownBar>)}
+            {!isWeb && (<UpBar></UpBar>)}
+            <ScrollView >
+                <View style={styles.container}>
 
-            {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+                    {/* Contenedor del formulario */}
+                    <View style={styles.card}>
+                        {/* Input para el título */}
+                        <TextInput
+                            style={styles.titleInput}
+                            placeholder="Título del registro"
+                            placeholderTextColor="#A3A3A3"
+                            value={title}
+                            onChangeText={setTitle}
+                        />
 
-            {/* Campos de entrada */}
-            <TextInput
-                style={styles.input}
-                placeholder="Título"
-                placeholderTextColor="#A3A3A3"
-                value={title}
-                onChangeText={setTitle}
-            />
-            <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Descripción"
-                placeholderTextColor="#A3A3A3"
-                value={description}
-                onChangeText={setDescription}
-                multiline
-            />
+                        {/* Imagen o ícono de cámara */}
+                        <TouchableOpacity
+                            style={styles.imageContainer}
+                            onPress={Platform.OS === "web" ? handlePickImage : null}
+                        >
+                            {image ? (
+                                <Image source={{ uri: image }} style={styles.image} />
+                            ) : (
+                                <Text style={styles.cameraIcon}>📷</Text>
+                            )}
+                        </TouchableOpacity>
 
-            {/* Opciones para subir o tomar una foto */}
-            {Platform.OS === "web" ? (
-                <View
-                    style={styles.dropZone}
-                    onDrop={(event) => {
-                        event.preventDefault();
-                        const file = event.dataTransfer.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = () => setImage(reader.result);
-                            reader.readAsDataURL(file);
-                        }
-                    }}
-                    onDragOver={(event) => event.preventDefault()}
-                >
-                    <Text style={styles.dropZoneText}>
-                        Arrastra una imagen aquí o haz clic para seleccionar
-                    </Text>
-                    <input
-                        type="file"
-                        id="fileInput"
-                        style={styles.fileInput}
-                        accept="image/*"
-                        onChange={handleFileChange}
-                    />
-                </View>
-            ) : (
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={handlePickImage}>
-                        <Text style={styles.buttonText}>Subir Foto</Text>
+                        {/* Opciones para subir o tomar foto en móvil */}
+                        {Platform.OS !== "web" && (
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity style={styles.button} onPress={handlePickImage}>
+                                    <Text style={styles.buttonText}>Galería</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
+                                    <Text style={styles.buttonText}>Cámara</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
+                        {/* Descripción */}
+                        <TextInput
+                            style={styles.description}
+                            placeholder="Descripción del registro"
+                            placeholderTextColor="#A3A3A3"
+                            multiline
+                            value={description}
+                            onChangeText={setDescription}
+                        />
+                    </View>
+
+                    {/* Input de archivos para web */}
+                    {Platform.OS === "web" && (
+                        <input
+                            type="file"
+                            id="fileInput"
+                            style={styles.fileInput}
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
+                    )}
+
+                    {/* Botón para guardar */}
+                    <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                        <Text style={styles.saveButtonText}>Guardar Registro</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
-                        <Text style={styles.buttonText}>Tomar Foto</Text>
-                    </TouchableOpacity>
                 </View>
-            )}
-
-            {/* Botón para guardar */}
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.saveButtonText}>Guardar Registro</Text>
-            </TouchableOpacity>
-        </ScrollView>
+            </ScrollView>
+            {!isWeb && (<DownBar></DownBar>)}
+        </View >
     );
 }
 
-const styles = StyleSheet.create({
+const appStyles = StyleSheet.create({
     container: {
-        flexGrow: 1,
+        flex: 1,
         alignItems: "center",
-        padding: 16,
-        backgroundColor: "#F7F7F7",
+        justifyContent: "center",
+        marginTop: "10%"
     },
-    backLink: {
-        color: "#072E44",
-        fontSize: 16,
-        textDecorationLine: "underline",
-        alignSelf: "flex-start",
-        marginBottom: 16,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "#333",
-        marginBottom: 16,
-    },
-    previewImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 16,
-        marginBottom: 16,
-    },
-    error: {
-        color: "red",
-        fontSize: 14,
-        marginBottom: 16,
-    },
-    input: {
-        backgroundColor: "#FBFEFC",
+    card: {
+        backgroundColor: "#F1F1F1",
         width: "90%",
-        borderRadius: 12,
+        height: "90%",
+        borderRadius: 20,
+        padding: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        alignItems: "center",
+    },
+    titleInput: {
+        width: "100%",
+        borderRadius: 8,
         height: 50,
         paddingHorizontal: 15,
-        marginBottom: 15,
+        marginBottom: 16,
+        marginTop: 16,
+        fontSize: 16,
+
+        borderRadius: 20,
+        backgroundColor: "#FBFEFC",
     },
-    textArea: {
-        height: 100,
+    imageContainer: {
+        backgroundColor: "#000",
+        width: "100%",
+        height: 200,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 16,
+    },
+    image: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 8,
+    },
+    cameraIcon: {
+        fontSize: 32,
+        color: "#FFF",
+    },
+    description: {
+        width: "100%",
+        height: "20%",
+        borderRadius: 12,
+        padding: 12,
         textAlignVertical: "top",
+        height: 80,
+        backgroundColor: "#FBFEFC",
     },
     buttonContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        width: "80%",
+        width: "100%",
+        marginBottom: 16,
     },
     button: {
         backgroundColor: "#072E44",
@@ -210,45 +252,39 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         alignItems: "center",
         marginHorizontal: 8,
+        flex: 1,
     },
     buttonText: {
         color: "#FFF",
         fontSize: 16,
         fontWeight: "bold",
     },
-    dropZone: {
-        borderWidth: 2,
-        borderColor: "#072E44",
-        borderStyle: "dashed",
-        borderRadius: 16,
-        padding: 20,
-        alignItems: "center",
-        justifyContent: "center",
-        width: "80%",
-    },
-    dropZoneText: {
-        color: "#666",
-        fontSize: 16,
-    },
-    fileInput: {
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        opacity: 0,
-        cursor: "pointer",
-    },
     saveButton: {
         backgroundColor: "#28A745",
+        width: "90%",
         paddingVertical: 15,
-        paddingHorizontal: 20,
-        borderRadius: 8,
+        borderRadius: 12,
         alignItems: "center",
-        marginTop: 16,
-        width: "80%",
+        marginTop: 20,
     },
     saveButtonText: {
         color: "#FFF",
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: "bold",
+    },
+    fileInput: {
+        display: "none",
+    },
+});
+
+const webStyles = StyleSheet.create({
+    ...appStyles,
+    card: {
+        ...appStyles.card,
+        width: "50%", // Ajusta el tamaño en web
+    },
+    saveButton: {
+        ...appStyles.saveButton,
+        width: "50%", // Ajusta el tamaño en web
     },
 });

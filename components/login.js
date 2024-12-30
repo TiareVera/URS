@@ -18,6 +18,7 @@ export function Login() {
     const API_BASE_URL = "http://192.168.1.35:5001"; // Cambia la IP según tu red local
 
     function onChangeDato(name, value) {
+        console.log(name, value)
         setFormState((prevState) => ({ ...prevState, [name]: value }));
     }
 
@@ -43,19 +44,23 @@ export function Login() {
 
     const router = useRouter(); // Hook para controlar la navegación
     async function logIn() {
-        if (formState.userName && formState.pass) {
+        if (formState.userName !== "" && formState.pass !== "") {
+
+            console.log("formState.userName && formState.pass", formState.userName, formState.pass)
             try {
                 // Realiza la solicitud y almacena la respuesta en 'response'
-                const response = await axios.post(`${API_BASE_URL}/login-user`, {
+                const response = await axios.post('http://192.168.1.35:5001/login-user', {
                     userName: formState.userName,
                     password: formState.pass,
                 });
 
                 console.log("aqeui", response.data); // Ahora 'response' está correctamente definida
 
-                if (response.data) {
+                if (response.data.status === "ok") {
+                    // Guarda el usuario en AsyncStorage
+                    await AsyncStorage.setItem("username", formState.userName);
                     alert("Inicio de sesión exitoso");
-                    router.push("/principal"); // Redirige al usuario después del inicio de sesión exitoso
+                    router.push("/principal");
                 } else {
                     alert("Credenciales incorrectas");
                 }
@@ -76,7 +81,7 @@ export function Login() {
                         style={styles.input}
                         placeholder="Usuario"
                         placeholderTextColor="#A3A3A3"
-                        onChangeText={(name) => onChangeDato("userName", name)}
+                        onChangeText={(userName) => onChangeDato("userName", userName)}
                     />
                     <View style={styles.passwordContainer}>
                         <TextInput
