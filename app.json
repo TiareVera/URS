@@ -4,12 +4,12 @@
     "slug": "MawatApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo_blanco.jpeg",
     "userInterfaceStyle": "light",
     "scheme":"mawat",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/logo_sinfondo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -23,7 +23,7 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logo_sinfondo.png"
     },
     "plugins": [
       "expo-router"

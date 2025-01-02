@@ -2,7 +2,9 @@ import { StyleSheet, Text, View, TextInput, useWindowDimensions, TouchableOpacit
 import { useState } from "react";
 import { Link } from "expo-router";
 import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
+import CustomModal from "./modal/alertModal";
 export function Login() {
     const { width } = useWindowDimensions();
     const isWeb = width >= 1500; // Determina si es "web"
@@ -13,6 +15,7 @@ export function Login() {
         userName: "",
         pass: "",
     };
+    let message = "Datos no válidos"
     const [formState, setFormState] = useState(initialFormState);
     const [passwordVisible, setPasswordVisible] = useState(false); // Estado para alternar visibilidad de contraseña
     const API_BASE_URL = "http://192.168.1.35:5001"; // Cambia la IP según tu red local
@@ -30,15 +33,16 @@ export function Login() {
                     password: formState.pass,
                 });
                 if (response.data === "User already exists") {
-                    alert("Usuario ya registrado");
-                } else {
-                    alert("Usuario registrado con éxito");
+                    setModalMessage("Usuario ya registrado");
+                    setModalVisible(true);
                 }
             } catch (error) {
-                console.log("Error al registrar usuario:", error.message);
+                setModalMessage("Error al registrar usuario");
+                setModalVisible(true);
             }
         } else {
-            alert("Complete los datos");
+            setModalMessage("Complete los datos");
+            setModalVisible(true);
         }
     }
 
@@ -53,27 +57,45 @@ export function Login() {
                     userName: formState.userName,
                     password: formState.pass,
                 });
-
-                console.log("aqeui", response.data); // Ahora 'response' está correctamente definida
-
+                console.log(response.data)
                 if (response.data.status === "ok") {
                     // Guarda el usuario en AsyncStorage
                     await AsyncStorage.setItem("username", formState.userName);
-                    alert("Inicio de sesión exitoso");
                     router.push("/principal");
+                } if (response.data.status === "badPass") {
+                    setModalMessage("Credenciales incorrectas");
+                    setModalVisible(true);
                 } else {
-                    alert("Credenciales incorrectas");
+                    console.log(response.data)
+                    setModalMessage("Credenciales incorrectas");
+                    setModalVisible(true);
                 }
             } catch (error) {
-                console.log("Error al iniciar sesión:", error.message);
+                setModalMessage("Error al iniciar sesión");
+                setModalVisible(true);
             }
         } else {
-            alert("Complete los datos");
+            setModalMessage("Complete los campos obligatorios");
+            setModalVisible(true);
         }
     }
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [modalMessage, setModalMessage] = useState(""); // Estado para manejar el mensaje del modal
 
+    const handlePrimaryAction = () => {
+        // Lógica para cerrar sesión
+        console.log("validando datos");
+        setModalVisible(false);
+    };
     return (
         <View style={styles.container}>
+            <CustomModal
+                visible={isModalVisible}
+                onClose={() => setModalVisible(false)}
+                title={modalMessage}
+                primaryAction={handlePrimaryAction}
+                primaryText="Volver"
+            />
             <Text style={styles.title}>Bienvenido! ¿Listo para crear nuevos registros?</Text>
             <View style={{ backgroundColor: "#F1F1F1", width: "100%", height: "70%", borderTopStartRadius: 20, borderTopRightRadius: 20, alignItems: "center" }}>
                 <View style={[styles.inputContainer, { marginTop: "10%" }]}>

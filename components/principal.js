@@ -1,12 +1,19 @@
 import { Link } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import logo from '../assets/logo_blanco.jpeg';
 import { useRouter } from "expo-router";
 import {
     View, Text, Image, StyleSheet,
     Animated, Pressable, useWindowDimensions,
-    TouchableOpacity, AsyncStorage
+    TouchableOpacity, ScrollView, Dimensions, ImageBackground, Button,
+    SafeAreaView, FlatList
 } from "react-native"
+import logo from "../assets/logo.jpeg";
+import CustomModal from "./modal/alertModal";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SvgUri, { Svg } from 'react-native-svg'; // Asumiendo que usas una versión que aún lo soporta.
+import img1 from "../assets/images/img1.png"
+
+
 import DownBar from "./downbar";
 import UpBar from "./upbar";
 export function Principal() {
@@ -18,26 +25,147 @@ export function Principal() {
     const handleNavigation = (route) => {
         router.push(route);
     };
-    return (<View style={styles.container}>
-        {isWeb && (<DownBar></DownBar>)}
-        {!isWeb && (<UpBar></UpBar>)}
+    const ITEM_WIDTH = Dimensions.get("window").width * 0.9
+    const ITEM_HEIGHT = 200
+    const [user, setUser] = useState(null)
+    async function getUser() {
+        setUser(await AsyncStorage.getItem('username'))
+        return await AsyncStorage.getItem('username');
+    }
+    useEffect(() => {
+        getUser()
+    })
+    const [isModalVisible, setModalVisible] = useState(false);
 
-        <View style={styles.content}>
-            <Text style={styles.greeting}>Hola UserName,</Text>
-            <Text style={styles.subtitle}>Soluciones sin Límite de Industria</Text>
+    const handlePrimaryAction = () => {
+        // Lógica para cerrar sesión
+        console.log("Cerrando sesión...");
+        setModalVisible(false);
+    };
 
-            {/* Tarjetas informativas */}
-            <View style={styles.card}>
-                <Text style={styles.cardTitle}>Industria Farmacéutica</Text>
-                <Text style={styles.cardText}>
-                    MAWAT garantiza la integridad, seguridad y propiedad de los datos. Cumple con las exigencias actuales
-                    de monitoreo al estar validada por GMP, GSP GAMP5 y CFR21.
-                </Text>
+    const handleSecondaryAction = () => {
+        setModalVisible(false);
+    };
+    const cards = [
+        {
+            title: "Diseño De Solución",
+            descrition:
+                "Fase de entendimiento y levantamiento de necesidades para personalizar la solución a la medida de cada proyecto. Definición de magnitudes a monitorear, alcance de los dispositivos y límites de operación.",
+            posterUrl: "https://www.mawat.io/wp-content/uploads/2024/05/SOLUCION-graphic-2.svg",
+        },
+        {
+            title: "Implementación Eficiente",
+            descrition:
+                "Fase de implementación con estándares globales y optimización de recursos. Se prioriza la calidad en cada paso.",
+            posterUrl: "https://www.mawat.io/wp-content/uploads/2024/05/PRUEBA-graphic-1.svg",
+        },
+        {
+            title: "Implementación",
+            descrition:
+                "Para una implementación efectiva, se establecen las ubicaciones de los sensores y se crean los usuarios y dependencias. Con el fin de garantizar una transición efectiva y un funcionamiento óptimo se realiza una capacitación detallada al personal.",
+            posterUrl: "https://www.mawat.io/wp-content/uploads/2024/05/IMPLEMENTACION-graphic-V2.svg",
+        },
+        {
+            title: "Validación",
+            descrition:
+                "Aplicamos el protocolo de validación y calificación local para garantizar el cumplimiento de las normativas GAMP5 en el ecosistema del cliente.",
+            posterUrl: "https://www.mawat.io/wp-content/uploads/2024/05/VALIDACION-graphic-1.svg",
+        },
+        {
+            title: "Soporte",
+            descrition:
+                "Nuestro equipo de soporte brinda asesoría continua en la gestión operativa y ante la generación de incidencias. Realizamos calibraciones y mantenciones de los dispositivos y de ser necesario, su reposición durante todo el periodo de contratación.",
+            posterUrl: "https://www.mawat.io/wp-content/uploads/2024/05/SOPORTE-graphic-1.svg",
+        },
+    ];
+    const renderItem = ({ item }) => (
+        <View style={styles.itemContainer}>
+            <Text style={styles.itemtitle}>{item.title}</Text>
+            <View style={styles.itemdescriptionContainer}>
+                <Text style={styles.itemdescription}>{item.descrition}</Text>
+
             </View>
+        </View >
+    );
+    return (
 
-            <Text style={styles.sectionTitle}>Último registro</Text>
+        <View style={styles.container}>
+            {user ? (<>
+                {isWeb && (<DownBar></DownBar>)}
+                {!isWeb && (<UpBar></UpBar>)}
 
-            {/* Registro */}
+                <View style={styles.content}>
+                    <Text style={styles.greeting}>Hola {user}</Text>
+                    <Text style={styles.greeting}>Bienvenido a Mawat</Text>
+
+                    {/* Tarjetas informativas */}
+                    {isWeb ? (<View style={styles.card}>
+                        <ScrollView
+                            horizontal={true}
+                            showsHorizontalScrollIndicator={false}
+                            snapToAlignment="center" // Alinea el carrusel al centro
+                            decelerationRate="fast" // Hace el scroll más rápido
+                            contentContainerStyle={styles.scrollContainer}
+                        >
+                            {cards.map((item, index) => (
+                                <View key={index} style={[styles.card,]}>
+                                    <Text style={styles.cardTitle}>{item.title}</Text>
+                                    <Image
+                                        source={{ uri: item.posterUrl }}
+                                        style={styles.image}
+                                    />
+                                    <View style={[styles.cardDescriptionContainer,]}>
+                                        {!isWeb && (<ScrollView>
+                                            <Text style={styles.cardDescription}>{item.descrition}</Text>
+                                        </ScrollView>)}
+                                        {isWeb && (<Text style={styles.cardDescription}>{item.descrition}</Text>)}
+
+                                    </View>
+                                </View>
+                            ))}
+
+
+                        </ScrollView>
+                    </View>) : (
+
+                        <View style={{ marginHorizontal: "auto", height: "70%" }}>
+                            <SafeAreaView>
+                                <FlatList
+                                    data={cards}
+                                    renderItem={renderItem}
+                                    keyExtractor={(item, index) => index.toString()}
+                                    showsVerticalScrollIndicator={false}
+                                    style={styles.list}
+                                />
+
+                            </SafeAreaView>
+
+                        </View>
+
+
+                        /*  <ScrollView
+                             vertical={true} // Cambio importante aquí
+                         >
+                             
+                                 {cards.map((item, index) => (
+                                     <View key={index} style={styles.card}>
+                                         <Text style={styles.cardTitle}>{item.title}</Text>
+                                         <Image source={{ uri: item.posterUrl }} style={[styles.image, { backgroundColor: "red" }]} />
+                                         <View style={styles.cardDescriptionContainer}>
+ 
+                                             <Text style={styles.cardDescription}>{item.descrition}</Text>
+ 
+                                         </View>
+                                     </View>
+                                 ))}
+ 
+                         </ScrollView> */
+                    )}
+
+
+                    {/*  <Text style={styles.sectionTitle}>Último registro</Text>
+
+        
             <View style={styles.lastRecord}>
                 <View style={styles.recordIconContainer}>
                     <Text style={styles.recordIcon}>📷</Text>
@@ -49,74 +177,124 @@ export function Principal() {
                         lobortis porttitor.
                     </Text>
                 </View>
-            </View>
-        </View>
+            </View> */}
+                </View >
 
-        {/* Navegación inferior (solo móvil) */}
+                {/* Navegación inferior (solo móvil) */}
 
-        {!isWeb && (<DownBar></DownBar>)}
-    </View>
+                {!isWeb && (<DownBar></DownBar>)}
+            </>) : (
+                <View style={styles.lastRecord}>
+                    <Text style={styles.recordTitle}>Acceso denegado</Text>
+                </View>
+            )}
+
+        </View >
     )
 }
 const appStyles = StyleSheet.create({
+    itemContainer: {
+        backgroundColor: '#f9f9f9',
+        padding: 20,
+        marginVertical: 8,
+        marginHorizontal: 16,
+        borderRadius: 5,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.23,
+        shadowRadius: 2.62,
+        elevation: 4,
+    },
+    itemtitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    itemdescriptionContainer: {
+        marginTop: 5,
+    },
+    itemdescription: {
+        fontSize: 14,
+        color: '#666',
+    },
+    image: {
+        backgroundColor: "red",
+        height: 100,
+        width: 100
+    },
+    list: {
+        width: "100%",
+        alignContent: "center",
+        height: "100%"
+    },
+    scrollContainer: {
+        width: "100%",
+    },
+    cardDescriptionContainer: {
+        maxHeight: 100, // Altura máxima del área de descripción
+        width: "95%", // Ocupa el ancho completo de la tarjeta
+        marginTop: 10,
+        marginBottom: 10,
+        paddingHorizontal: 10, // Espaciado interno para el texto
+        backgroundColor: "#FBFBFB", // Fondo claro para visibilidad
+
+    },
+    cardDescription: {
+        fontSize: 18,
+        color: "#666",
+        lineHeight: 20, // Espaciado entre líneas
+        textAlign: "justify", // Justificación para mejor lectura
+    },
     container: {
         flex: 1,
-        backgroundColor: "#F7F7F7",
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-    },
-    logo: {
-        width: 120,
-        height: 50,
-        resizeMode: "contain",
+        height: "90%",
+
+        backgroundColor: "#FBFBFB",
     },
     content: {
         padding: 16,
+        height: "90%",
+        marginVertical: "auto",
+        alignItems: "center",
+        width: "80%",
+        marginHorizontal: "auto",
+
     },
     greeting: {
         fontSize: 24,
         fontWeight: "bold",
         color: "#333",
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: "#666",
-        marginBottom: 16,
+        margin: 8,
+        textAlign: "left",
+        width: "80%"
     },
     card: {
-        backgroundColor: "#EFEFEF",
-        borderRadius: 16,
-        padding: 16,
         marginBottom: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        height: "60%",
+        borderColor: "black",
+        width: "80%",
+        margin: "3%",
+        alignItems: "center",
+        backgroundColor: "blue"
     },
     cardTitle: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: "bold",
-        marginBottom: 8,
-    },
-    cardText: {
-        fontSize: 14,
-        color: "#666",
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: "bold",
         color: "#333",
-        marginBottom: 8,
+        margin: 20,
+        textAlign: "left",
+        width: "80%"
     },
     lastRecord: {
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "left",
         backgroundColor: "#FBFBFB",
         borderRadius: 16,
         padding: 16,
@@ -150,72 +328,44 @@ const appStyles = StyleSheet.create({
         fontSize: 14,
         color: "#666",
     },
-    bottomNavigation: {
-        position: "absolute", // Fija la barra de navegación
-        bottom: 0, // Toca el borde inferior de la pantalla
-        left: 0, // Alineado al borde izquierdo
-        right: 0, // Alineado al borde derecho
-        flexDirection: "row",
-        justifyContent: "space-around",
-        backgroundColor: "#072E44",
-        paddingVertical: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5, // Sombra en Android
-    },
-
-    navButton: {
-        fontSize: 20,
-        color: "#FFF",
-        textAlign: "center",
-    },
 });
 
 const webStyles = StyleSheet.create({
     ...appStyles,
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
+    content: {
         padding: 16,
+        height: "90%",
+        marginVertical: "auto",
+        alignItems: "center",
+        width: "80%",
+        marginHorizontal: "auto",
+
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+
+        borderColor: "black",
+
     },
-    navigation: {
-        flexDirection: "row",
-    },/* 
-    navLink: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: "#072E44",
-        marginHorizontal: 16,
-    }, */
-    navLink: {
-        color: "#072E44",
-        fontSize: 18,
-        fontWeight: "bold",
-        marginHorizontal: 20,
-        cursor: "pointer", // Agrega el cursor para web
+    card: {
+        marginBottom: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        height: "60%",
+        borderColor: "black",
+        width: "80%",
+        margin: "3%",
+        alignItems: "center"
     },
-    dropdownContainer: {
-        position: "relative", // Necesario para posicionar el menú desplegable
-    },
-    dropdownMenu: {
-        position: "absolute",
-        top: "100%", // Posiciona el menú debajo del enlace
-        left: 0,
-        backgroundColor: "#FFF",
-        borderRadius: 8,
-        padding: 8,
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        zIndex: 10, // Asegura que el menú aparezca encima de otros elementos
-    },
-    dropdownItem: {
-        color: "#333",
-        fontSize: 16,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        cursor: "pointer", // Cursor en la web
-        textAlign: "left",
+
+    image: {
+        width: "100%",
+        height: "100%",
+        resizeMode: "contain", // Asegura que toda la imagen sea visible
     },
 });
