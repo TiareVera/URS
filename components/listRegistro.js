@@ -15,6 +15,7 @@ import axios from "axios";
 import DownBar from "./downbar";
 import UpBar from "./upbar";
 import { useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function Registro() {
     const { width } = useWindowDimensions();
@@ -30,7 +31,9 @@ export function Registro() {
             try {
                 const response = await axios.get("http://192.168.1.35:5001/obtener-registros");
                 if (response.data.status === "ok") {
+
                     setRegistros(response.data.data); // Guarda los registros en el estado
+
                 } else {
                     console.log("Error al obtener registros:", response.data.data);
                 }
@@ -49,7 +52,7 @@ export function Registro() {
             style={styles.card}
             onPress={() => router.push(`/${item._id}`)} // Navega al detalle del registro
         >
-            <Text style={styles.cardTitle}>titulo {item.titulo}</Text>
+            <Text style={styles.cardTitle}>{item.titulo}</Text>
             <View style={styles.imageContainer}>
                 <Image source={{ uri: item.foto }} style={styles.image} />
             </View>
@@ -61,7 +64,7 @@ export function Registro() {
             {!isWeb && <UpBar />}
 
             <Text style={styles.title}>Todos los registros</Text>
-            {registros === null ? (
+            {registros.length == 0 ? (
                 <ActivityIndicator color="blue" size="large" />
             ) :
                 (<>
@@ -109,11 +112,12 @@ const appStyles = StyleSheet.create({
         marginBottom: "10%",
     },
     title: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: "bold",
         color: "#333",
         marginTop: 16,
-        textAlign: "center",
+        paddingHorizontal: 20,
+        textAlign: "start",
     },
     card: {
         backgroundColor: "#F1F1F1",

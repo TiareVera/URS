@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image, Pressable } from "react-native";
 import { Link, usePathname } from "expo-router";
 import logo from "../assets/logo.jpeg";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -48,7 +48,11 @@ export default function DownBar() {
             />
             {isWeb ? (
                 <View style={styles.webHeader}>
-                    <Image source={logo} style={styles.logo} />
+                    <Link href={"/principal"}>
+                        <Pressable>
+                            <Image source={logo} style={styles.logo} />
+                        </Pressable>
+                    </Link>
                     <View style={styles.navigation}>
                         <Link href="/principal" style={styles.navLink}>
                             Inicio

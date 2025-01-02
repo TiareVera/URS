@@ -1,9 +1,11 @@
-import { ActivityIndicator, Text, View, StyleSheet, Image, ScrollView, useWindowDimensions } from "react-native";
+import { ActivityIndicator, Text, View, StyleSheet, Image, ScrollView, useWindowDimensions, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 import DownBar from "./downbar";
 import UpBar from "./upbar";
+import { useRouter } from "expo-router";
+import backArrow from "../assets/icons/backArrow.png"
 export function Detail({ idRegistro }) {
     const [registroInfo, setRegistroInfo] = useState(null);
     const { width } = useWindowDimensions();
@@ -18,7 +20,10 @@ export function Detail({ idRegistro }) {
                 .catch(error => console.error("Error al obtener registro:", error.message));
         }
     }, [idRegistro]);
-
+    const router = useRouter(); // Hook para controlar la navegación
+    const back = () => {
+        router.push("/registro");
+    }
     return (
         <View style={{
             height: "100%",
@@ -27,17 +32,30 @@ export function Detail({ idRegistro }) {
             {isWeb && (<DownBar></DownBar>)}
             {!isWeb && (<UpBar></UpBar>)}
             <View style={styles.container}>
+                <TouchableOpacity style={{ alignItems: "flex-start", justifyContent: "flex-start", }}
+                    onPress={back}>
+                    <Text style={styles.cameraIcon}><Image source={backArrow} style={{ width: 24, height: 24 }} /></Text>
+                </TouchableOpacity>
                 {registroInfo === null ? (
                     <ActivityIndicator color="blue" size="large" style={{ marginTop: 20 }} />
                 ) : (
-                    <ScrollView style={styles.content}>
-                        <Text style={styles.title}>{registroInfo.titulo}</Text>
-                        <View style={styles.descriptionContainer}>
-                            <Text style={styles.description}>{registroInfo.descipcion}</Text>
+                    <ScrollView style={[styles.content, {
+                        backgroundColor: "#FBFEFC",
+                        padding: "1%",
+                        borderRadius: 20,
+                        marginVertical: 20,
+                    }]}>
+                        <View style={{ margin: 20 }}>
+                            <Text style={styles.title}>{registroInfo.titulo}</Text>
+                            <View style={styles.imageContainer}>
+                                <Image source={{ uri: registroInfo.foto }} style={styles.image} />
+                            </View>
+
+                            <View style={styles.descriptionContainer}>
+                                <Text >{registroInfo.descipcion}</Text>
+                            </View>
                         </View>
-                        <View style={styles.imageContainer}>
-                            <Image source={{ uri: registroInfo.foto }} style={styles.image} />
-                        </View>
+
                     </ScrollView>
                 )}
             </View>
@@ -61,8 +79,6 @@ const appStyles = StyleSheet.create({
     content: {
         flex: 1,
         width: "100%",
-        height: "60%",
-
     },
     card: {
         backgroundColor: "#F1F1F1",
@@ -81,10 +97,10 @@ const appStyles = StyleSheet.create({
         width: "100%",
         height: "100%", // Puedes ajustar la altura según tus necesidades
         marginBottom: 16,
-        backgroundColor: "#EEE", // Fondo para diferenciar el área
+        backgroundColor: "black", // Fondo para diferenciar el área
         justifyContent: "space-between", // Alinea el contenido hacia arriba
         alignItems: "flex-start",
-        borderRadius: 20,
+
         padding: "1%"
     },
     image: {
@@ -95,15 +111,8 @@ const appStyles = StyleSheet.create({
 
     },
     descriptionContainer: {
-        backgroundColor: "#FFF",
-        borderRadius: 16,
         padding: 16,
         marginVertical: 20,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
         width: "100%",
     },
     description: {
@@ -113,7 +122,7 @@ const appStyles = StyleSheet.create({
         textAlign: "justify",
     },
     cameraIcon: {
-        fontSize: 32,
+        fontSize: 20,
         color: "#FFF",
     },
     buttonContainer: {

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image, Pressable } from "react-native";
 import { Link, usePathname } from "expo-router";
 import logo from "../assets/logo_sinfondo.png";
 
@@ -19,7 +19,11 @@ export default function UpBar() {
     return (
         <>
             <View style={{ backgroundColor: "white", height: "10%" }}>
-                <Image source={logo} style={styles.logo} /></View>
+                <Link href={"/principal"}>
+                    <Pressable>
+                        <Image source={logo} style={styles.logo} />
+                    </Pressable>
+                </Link></View>
         </>
     );
 }

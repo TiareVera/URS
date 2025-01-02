@@ -5,7 +5,7 @@ import {
     View, Text, Image, StyleSheet,
     Animated, Pressable, useWindowDimensions,
     TouchableOpacity, ScrollView, Dimensions, ImageBackground, Button,
-    SafeAreaView, FlatList
+    SafeAreaView, FlatList, ActivityIndicator
 } from "react-native"
 import logo from "../assets/logo.jpeg";
 import CustomModal from "./modal/alertModal";
@@ -28,12 +28,18 @@ export function Principal() {
     const ITEM_WIDTH = Dimensions.get("window").width * 0.9
     const ITEM_HEIGHT = 200
     const [user, setUser] = useState(null)
+    const [userID, setUserID] = useState(null)
     async function getUser() {
         setUser(await AsyncStorage.getItem('username'))
         return await AsyncStorage.getItem('username');
     }
+    async function getUserID() {
+        setUserID(await AsyncStorage.getItem('userID'))
+        return await AsyncStorage.getItem('userID');
+    }
     useEffect(() => {
         getUser()
+        getUserID()
     })
     const [isModalVisible, setModalVisible] = useState(false);
 
@@ -95,7 +101,7 @@ export function Principal() {
                 {!isWeb && (<UpBar></UpBar>)}
 
                 <View style={styles.content}>
-                    <Text style={styles.greeting}>Hola {user}</Text>
+                    <Text style={styles.greeting}>Hola {user} {userID}</Text>
                     <Text style={styles.greeting}>Bienvenido a Mawat</Text>
 
                     {/* Tarjetas informativas */}
@@ -184,8 +190,9 @@ export function Principal() {
 
                 {!isWeb && (<DownBar></DownBar>)}
             </>) : (
+
                 <View style={styles.lastRecord}>
-                    <Text style={styles.recordTitle}>Acceso denegado</Text>
+                    <ActivityIndicator color="blue" size="large" />
                 </View>
             )}
 

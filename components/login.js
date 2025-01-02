@@ -57,10 +57,11 @@ export function Login() {
                     userName: formState.userName,
                     password: formState.pass,
                 });
-                console.log(response.data)
+                console.log("response.data.userID", response.data.userID)
                 if (response.data.status === "ok") {
                     // Guarda el usuario en AsyncStorage
                     await AsyncStorage.setItem("username", formState.userName);
+                    await AsyncStorage.setItem("userID", response.data.userID); // Guarda el userID
                     router.push("/principal");
                 } if (response.data.status === "badPass") {
                     setModalMessage("Credenciales incorrectas");
@@ -120,7 +121,10 @@ export function Login() {
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity>
-                        <Text style={styles.forgotPassword}>¿No tienes cuenta, regístrate?</Text>
+                        <Text style={styles.forgotPassword}>¿No tienes cuenta?
+                            <Link href="https://www.mawat.io/" style={styles.navLink}>
+                                , Contactanos
+                            </Link></Text>
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity style={styles.button} onPress={logIn}>

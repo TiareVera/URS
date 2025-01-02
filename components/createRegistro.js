@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -9,8 +9,11 @@ import {
     TextInput,
     useWindowDimensions,
     ScrollView,
+    ActivityIndicator
 } from "react-native";
+import { useRouter } from "expo-router";
 import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from "expo-image-picker";
 
 import DownBar from "./downbar";
@@ -23,8 +26,15 @@ export function CrearRegistro() {
     const [image, setImage] = useState(null); // Imagen seleccionada
     const [title, setTitle] = useState(""); // Título del registro
     const [description, setDescription] = useState(""); // Descripción del registro
-    const [userID] = useState("12345"); // Ejemplo de userID (ajusta según tu autenticación)
-
+    const [userID, setUserID] = useState(null); // Ahora dinámicoconst 
+    const router = useRouter();
+    async function getUserID() {
+        setUserID(await AsyncStorage.getItem('userID'))
+        return await AsyncStorage.getItem('userID');
+    }
+    useEffect(() => {
+        getUserID()
+    })
     const handlePickImage = async () => {
         console.log("here")
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -45,7 +55,14 @@ export function CrearRegistro() {
             setImage(`data:image/jpeg;base64,${pickerResult.assets[0].base64}`); // Guardar la imagen en base64
         }
     };
-
+    useEffect(() => {
+        const fetchUserID = async () => {
+            const storedUserID = await AsyncStorage.getItem("userID");
+            console.log("storedUserID")
+            setUserID(storedUserID); // Actualiza el estado con el ID
+        };
+        fetchUserID();
+    }, []);
     const handleTakePhoto = async () => {
         const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
         if (!permissionResult.granted) {
@@ -74,12 +91,15 @@ export function CrearRegistro() {
             reader.readAsDataURL(file);
         }
     };
+    const [isModalVisible, setModalVisible] = useState(false);
+
     const handleSave = async () => {
         if (!title || !description || !image) {
             alert("Por favor, completa todos los campos.");
             return;
         }
 
+        setModalVisible(true);
         try {
             const response = await axios.post("http://192.168.1.35:5001/crear-registro", {
                 titulo: title,
@@ -90,10 +110,14 @@ export function CrearRegistro() {
 
             if (response.data.status === "ok") {
                 alert("Registro creado con éxito");
+
                 // Resetear el formulario
                 setTitle("");
                 setDescription("");
                 setImage(null);
+
+                setModalVisible(false);
+                router.push("/registro");
             } else {
                 alert("Error al guardar el registro");
             }
@@ -101,6 +125,8 @@ export function CrearRegistro() {
             console.error(error);
             alert("Error al conectar con el servidor");
         }
+
+        setModalVisible(false);
     };
 
 
@@ -113,6 +139,7 @@ export function CrearRegistro() {
             {isWeb && (<DownBar></DownBar>)}
             {!isWeb && (<UpBar></UpBar>)}
             <ScrollView >
+                {isModalVisible && <ActivityIndicator color="blue" size="large" />}
                 <View style={styles.container}>
 
                     {/* Contenedor del formulario */}
