@@ -5,6 +5,7 @@ import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import CustomModal from "./modal/alertModal";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 export function Login() {
     const { width } = useWindowDimensions();
     const isWeb = width >= 1500; // Determina si es "web"
@@ -116,7 +117,7 @@ export function Login() {
                         />
                         <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
                             <Text style={styles.togglePassword}>
-                                {passwordVisible ? "👁️" : "🙈"} {/* Íconos para alternar */}
+                                {passwordVisible ? <FontAwesome name="eye" size={24} color="black" /> : <FontAwesome name="eye-slash" size={24} color="black" />} {/* Íconos para alternar */}
                             </Text>
                         </TouchableOpacity>
                     </View>

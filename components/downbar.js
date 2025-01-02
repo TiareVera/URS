@@ -5,6 +5,7 @@ import logo from "../assets/logo.jpeg";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import CustomModal from "../components/modal/alertModal";
+import Entypo from '@expo/vector-icons/Entypo';
 export default function DownBar() {
     const pathname = usePathname(); // Ruta actual
     const { width } = useWindowDimensions();
@@ -70,17 +71,17 @@ export default function DownBar() {
                 </View>
             ) : (
                 <View style={styles.mobileFooter}>
-                    <Link href="/principal" style={styles.navButton}>
-                        🏠
+                    <Link href="/principal">
+                        <Entypo name="home" size={24} color="#072E44" />
                     </Link>
-                    <Link href="/crearRegistro" style={styles.navButton}>
-                        ➕
+                    <Link href="/crearRegistro" >
+                        <Entypo name="add-to-list" size={24} color="#072E44" />
                     </Link>
-                    <Link href="/registro" style={styles.navButton}>
-                        📋
+                    <Link href="/registro" >
+                        <Entypo name="list" size={24} color="#072E44" />
                     </Link>
                     <TouchableOpacity onPress={() => setModalVisible(true)}>
-                        <Text style={styles.navButton}>⚙️</Text>
+                        <Entypo name="log-out" size={24} color="#072E44" />
                     </TouchableOpacity>
                 </View>
             )}
@@ -89,6 +90,31 @@ export default function DownBar() {
 }
 
 const styles = StyleSheet.create({
+    mobileFooter: {
+        position: "absolute",
+        bottom: 10,
+        left: 0,
+        right: 0,
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
+        backgroundColor: "#FBFBFB", // Fondo blanco
+        borderRadius: 20, // Bordes redondeados
+        marginHorizontal: 10, // Margen lateral para dar espacio al footer
+        paddingVertical: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5, // Sombra para Android
+    },
+    navButton: {
+        width: 50, // Ajustar el tamaño del área táctil
+        height: 50,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
     webHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -113,24 +139,5 @@ const styles = StyleSheet.create({
         textDecorationLine: "none",
         cursor: "pointer", // Para web
     },
-    mobileFooter: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        flexDirection: "row",
-        justifyContent: "space-around",
-        backgroundColor: "#072E44",
-        paddingVertical: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
-    },
-    navButton: {
-        fontSize: 20,
-        color: "#FFF",
-        textAlign: "center",
-    },
+
 });

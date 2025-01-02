@@ -5,7 +5,8 @@ import axios from "axios";
 import DownBar from "./downbar";
 import UpBar from "./upbar";
 import { useRouter } from "expo-router";
-import backArrow from "../assets/icons/backArrow.png"
+import Ionicons from '@expo/vector-icons/Ionicons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 export function Detail({ idRegistro }) {
     const [registroInfo, setRegistroInfo] = useState(null);
     const { width } = useWindowDimensions();
@@ -34,7 +35,8 @@ export function Detail({ idRegistro }) {
             <View style={styles.container}>
                 <TouchableOpacity style={{ alignItems: "flex-start", justifyContent: "flex-start", }}
                     onPress={back}>
-                    <Text style={styles.cameraIcon}><Image source={backArrow} style={{ width: 24, height: 24 }} /></Text>
+                    <Text style={styles.cameraIcon}>
+                        <AntDesign name="left" size={24} color="black" /></Text>
                 </TouchableOpacity>
                 {registroInfo === null ? (
                     <ActivityIndicator color="blue" size="large" style={{ marginTop: 20 }} />

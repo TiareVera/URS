@@ -101,7 +101,7 @@ export function Principal() {
                 {!isWeb && (<UpBar></UpBar>)}
 
                 <View style={styles.content}>
-                    <Text style={styles.greeting}>Hola {user} {userID}</Text>
+                    <Text style={styles.greeting}>Hola {user}</Text>
                     <Text style={styles.greeting}>Bienvenido a Mawat</Text>
 
                     {/* Tarjetas informativas */}
@@ -259,7 +259,7 @@ const appStyles = StyleSheet.create({
         flex: 1,
         height: "90%",
 
-        backgroundColor: "#FBFBFB",
+        backgroundColor: "#BFC1C0",
     },
     content: {
         padding: 16,
@@ -352,7 +352,8 @@ const webStyles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
-
+        borderRadius: 20,
+        backgroundColor: "#FBFBFB",
         borderColor: "black",
 
     },
