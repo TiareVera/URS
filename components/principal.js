@@ -1,9 +1,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
+import axios from "axios";
 import {
     View, Text, Image, StyleSheet,
-    useWindowDimensions, ScrollView, Dimensions,
+    useWindowDimensions, ScrollView, TouchableOpacity,
     SafeAreaView, FlatList, ActivityIndicator
 } from "react-native"
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,14 +14,33 @@ export function Principal() {
     const { width } = useWindowDimensions();
     const isWeb = width >= 1500; // Determina si es "web"
     const styles = isWeb ? webStyles : appStyles; // Usa estilos según la plataforma
+    const [ultimoRegistro, setUltimoRegistro] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null)
+    const [userID, setUserID] = useState(null);
     async function getUser() {
         setUser(await AsyncStorage.getItem('username'))
+        setUserID(await AsyncStorage.getItem('userID'))
         return await AsyncStorage.getItem('username');
     }
+    const fetchUltimoRegistro = async () => {
+        try {
+            const response = await axios.get(`http://192.168.1.35:5001/ultimo-registro/${userID}`);
+            setUltimoRegistro(response.data.data);
+        } catch (error) {
+            //console.error("Error al obtener el último registro:", error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
+
+        fetchUltimoRegistro()
+    })
     useEffect(() => {
         getUser()
-    })
+
+    }, [])
     const cards = [
         {
             title: "Diseño De Solución",
@@ -103,7 +123,7 @@ export function Principal() {
                         </ScrollView>
                     </View>) : (
 
-                        <View style={{ marginHorizontal: "auto", height: "70%" }}>
+                        <View style={{ marginHorizontal: "auto", height: "50%" }}>
                             <SafeAreaView>
                                 <FlatList
                                     data={cards}
@@ -153,6 +173,25 @@ export function Principal() {
                     </Text>
                 </View>
             </View> */}
+                    {!isWeb && (<><Text style={[styles.greeting, { fontSize: 20, width: "100%" }]}>Ultimo Registro</Text>
+                        {ultimoRegistro ? (
+                            <View style={styles.mobileFooter}>
+                                <Image source={{ uri: ultimoRegistro.foto }} style={[styles.image, { borderRadius: 100, margin: 10 }]} />
+                                <View style={{ width: "60%" }}>
+                                    <Text style={[styles.greeting, { fontSize: 18, width: "100%" }]}>{ultimoRegistro.titulo}</Text>
+                                    <Text style={styles.description}>{ultimoRegistro.descipcion}</Text>
+                                </View>
+
+                            </View>
+                        ) : (
+                            <TouchableOpacity
+                                style={styles.createButton}
+                                onPress={() => router.push("/crearRegistro")}
+                            >
+                                <Text style={styles.createButtonText}>Crear Registro</Text>
+                            </TouchableOpacity>
+                        )}</>)}
+
                 </View >
 
                 {/* Navegación inferior (solo móvil) */}
@@ -169,6 +208,22 @@ export function Principal() {
     )
 }
 const appStyles = StyleSheet.create({
+    mobileFooter: {
+        position: "absolute",
+        bottom: "12%",
+        left: 0,
+        right: 0,
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
+        backgroundColor: "#FBFBFB", // Fondo blanco
+        borderRadius: 20, // Bordes redondeados
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5, // Sombra para Android
+    },
     itemContainer: {
         backgroundColor: '#f9f9f9',
         padding: 20,
@@ -199,7 +254,8 @@ const appStyles = StyleSheet.create({
     image: {
         backgroundColor: "red",
         height: 100,
-        width: 100
+        width: 100,
+        padding: 5
     },
     list: {
         width: "100%",
