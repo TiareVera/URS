@@ -1,57 +1,26 @@
-import { Link } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import {
     View, Text, Image, StyleSheet,
-    Animated, Pressable, useWindowDimensions,
-    TouchableOpacity, ScrollView, Dimensions, ImageBackground, Button,
+    useWindowDimensions, ScrollView, Dimensions,
     SafeAreaView, FlatList, ActivityIndicator
 } from "react-native"
-import logo from "../assets/logo.jpeg";
-import CustomModal from "./modal/alertModal";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SvgUri, { Svg } from 'react-native-svg'; // Asumiendo que usas una versión que aún lo soporta.
-import img1 from "../assets/images/img1.png"
-
-
 import DownBar from "./downbar";
 import UpBar from "./upbar";
 export function Principal() {
     const { width } = useWindowDimensions();
     const isWeb = width >= 1500; // Determina si es "web"
     const styles = isWeb ? webStyles : appStyles; // Usa estilos según la plataforma
-    const [showDropdown, setShowDropdown] = useState(false); // Estado para mostrar/ocultar el menú desplegable
-    const router = useRouter();
-    const handleNavigation = (route) => {
-        router.push(route);
-    };
-    const ITEM_WIDTH = Dimensions.get("window").width * 0.9
-    const ITEM_HEIGHT = 200
     const [user, setUser] = useState(null)
-    const [userID, setUserID] = useState(null)
     async function getUser() {
         setUser(await AsyncStorage.getItem('username'))
         return await AsyncStorage.getItem('username');
     }
-    async function getUserID() {
-        setUserID(await AsyncStorage.getItem('userID'))
-        return await AsyncStorage.getItem('userID');
-    }
     useEffect(() => {
         getUser()
-        getUserID()
     })
-    const [isModalVisible, setModalVisible] = useState(false);
-
-    const handlePrimaryAction = () => {
-        // Lógica para cerrar sesión
-        console.log("Cerrando sesión...");
-        setModalVisible(false);
-    };
-
-    const handleSecondaryAction = () => {
-        setModalVisible(false);
-    };
     const cards = [
         {
             title: "Diseño De Solución",

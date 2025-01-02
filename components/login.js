@@ -16,7 +16,6 @@ export function Login() {
         userName: "",
         pass: "",
     };
-    let message = "Datos no válidos"
     const [formState, setFormState] = useState(initialFormState);
     const [passwordVisible, setPasswordVisible] = useState(false); // Estado para alternar visibilidad de contraseña
     const API_BASE_URL = "http://192.168.1.35:5001"; // Cambia la IP según tu red local

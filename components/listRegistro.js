@@ -7,7 +7,6 @@ import {
     Image,
     useWindowDimensions,
     SafeAreaView,
-    ScrollView,
     TouchableOpacity,
     ActivityIndicator
 } from "react-native";
@@ -15,7 +14,6 @@ import axios from "axios";
 import DownBar from "./downbar";
 import UpBar from "./upbar";
 import { useRouter } from "expo-router";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function Registro() {
     const { width } = useWindowDimensions();

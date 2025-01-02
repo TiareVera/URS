@@ -5,7 +5,6 @@ import axios from "axios";
 import DownBar from "./downbar";
 import UpBar from "./upbar";
 import { useRouter } from "expo-router";
-import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 export function Detail({ idRegistro }) {
     const [registroInfo, setRegistroInfo] = useState(null);

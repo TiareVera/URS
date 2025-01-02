@@ -1,12 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image, Pressable } from "react-native";
+import { View, StyleSheet, useWindowDimensions, Image, Pressable } from "react-native";
 import { Link, usePathname } from "expo-router";
 import logo from "../assets/logo_sinfondo.png";
 
 export default function UpBar() {
     const pathname = usePathname(); // Ruta actual
-    const { width } = useWindowDimensions();
-    const isWeb = width >= 1500; // Detección de entorno web
 
     // Rutas donde NO se mostrarán las barras de navegación
     const hideNavigation = ["/login", "/main"];
